@@ -1,0 +1,26 @@
+{
+  "name": "gantri",
+  "version": "1.0.0",
+  "description": "Coding challenge for Gantri",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrischan226/gantri.git"
+  },
+  "author": "Christopher Chan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chrischan226/gantri/issues"
+  },
+  "homepage": "https://github.com/chrischan226/gantri#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "morgan": "^1.9.1",
+    "nodemon": "^1.19.4",
+    "pg": "^7.12.1"
+  }
+}
