@@ -32,27 +32,21 @@ const getArtByID = (req, res) => {
 }
 
 async function getCommentsByArtID(id) {
-    let promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         pool.query(`SELECT comments FROM art WHERE id = ${id}`, (error, results) => {
             if (error) throw error;
             resolve(results.rows[0].comments);
         });
     });
-    
-    let comments = await promise;
-    return comments;
 }
 
 async function updateComments(id, comments) {
-    let promise = new Promise((resolve, reject) => { 
+    return new Promise((resolve, reject) => { 
         pool.query(`UPDATE art SET comments = '${comments}' WHERE id = ${id}`, (error, results) => {
             if (error) throw error
             resolve('success');
         })
     });
-
-    let status = await promise;
-    return status;
 }
 
 const postComment = (req, res) => {
@@ -79,13 +73,11 @@ const postComment = (req, res) => {
                     'content': content
                 });
                 comments = JSON.stringify(comments);
-                updateComments(id, comments).then(status => {
-                    if(status === 'success') res.status(200);
-                });
+                return updateComments(id, comments);
             }
         })
-        .then(() => {
-            if(res.statusCode === 200) {
+        .then((status) => {
+            if(status) {
                 res.send('Comment added successfully');
             } else {
                 res.send('Only one comment per unverified user, comment was unable to be added')
