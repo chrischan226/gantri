@@ -3,7 +3,7 @@ CREATE TABLE art (
     title varchar(50) NOT NULL,
     artist varchar(20) NOT NULL,
     year smallint NOT NULL,
-    comments json
+    comments json DEFAULT '[]'
 );
 
 CREATE TABLE users (
