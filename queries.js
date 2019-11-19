@@ -79,7 +79,9 @@ const postComment = (req, res) => {
                     'content': content
                 });
                 comments = JSON.stringify(comments);
-                updateComments(id, comments).then(status => res.status(status));
+                updateComments(id, comments).then(status => {
+                    if(status === 'success') res.status(200);
+                });
             }
         })
         .then(() => {
