@@ -14,9 +14,4 @@ app.post('/api/art/:id/comments', db.postComment);
 app.post('/api/users', db.createUser);
 app.get('/api/users', db.getUsers);
 
-
-app.get('/', (req, res) => {
-    res.send('hello world');
-});
-
 app.listen(port, () => console.log(`Listening on port ${port}!`))
