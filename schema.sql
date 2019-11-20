@@ -1,7 +1,7 @@
 CREATE TABLE art (
     id integer primary key,
-    title varchar(50) NOT NULL,
-    artist varchar(20) NOT NULL,
+    title varchar(500) NOT NULL,
+    artist varchar(200) NOT NULL,
     year smallint NOT NULL,
     comments json DEFAULT '[]'
 );
