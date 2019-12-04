@@ -31,21 +31,12 @@ const getArtByID = (req, res) => {
     })
 }
     
-artExists = (id) => {
+getArtInfo = (id) => {
     return new Promise((resolve, reject) => {
         pool.query(`SELECT * FROM art WHERE id = ${id}`, (error, results) => {
             if (error) throw error;
-            resolve(results.rows.length);
+            resolve(results.rows);
         })
-    });
-}
-
-getCommentsByArtID = (id) => {
-    return new Promise((resolve, reject) => {
-        pool.query(`SELECT comments FROM art WHERE id = ${id}`, (error, results) => {
-            if (error) throw error;
-            resolve(results.rows[0].comments);
-        });
     });
 }
 
@@ -58,7 +49,7 @@ updateComments = (id, comments) => {
     });
 }
 
-function addComments(id, userID, name, content) {
+addComments = (id, userID, name, content) => {
     if(userID) {
         return new Promise((resolve, reject) => {
             pool.query(`INSERT INTO comments(userID, artID, name, content) VALUES(${userID},${id},'${name}','${content}')`, (error, results) => {
@@ -81,9 +72,9 @@ const postComment =  async (req, res) => {
     const { userID, name, content } = req.body;
 
     try {
-        let art = await artExists(id);
-        if(art > 0) {
-            let comments = await getCommentsByArtID(id);
+        let art = await getArtInfo(id);
+        if(art.length > 0) {
+            let comments = art[0].comments;
             if(!userID) {
                 for(let i = 0; i < comments.length; i++) {
                     if(comments[i].name === name) {
@@ -102,8 +93,11 @@ const postComment =  async (req, res) => {
                 var status = await updateComments(id, comments);
             }
             if(status === 'success') status = await addComments(id, userID, name, content);
-            if(status === 'success') res.send('Comment added successfully');
-            res.send('Only one comment per unverified user, comment was unable to be added')
+            if(status === 'success') {
+                res.send('Comment added successfully')
+            } else {
+                res.send('Only one comment per unverified user, comment was unable to be added')
+            };
         }
         else {
             res.send('Art ID is invalid');
