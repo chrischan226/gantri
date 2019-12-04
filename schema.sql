@@ -15,6 +15,7 @@ CREATE TABLE users (
 
 CREATE TABLE comments (
     id serial UNIQUE primary key,
+    artID integer REFERENCES art(id),
     userID integer REFERENCES users (id),
     name varchar(25),
     content varchar(140) NOT NULL,

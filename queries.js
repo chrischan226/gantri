@@ -30,8 +30,17 @@ const getArtByID = (req, res) => {
         }
     })
 }
+    
+artExists = (id) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`SELECT * FROM art WHERE id = ${id}`, (error, results) => {
+            if (error) throw error;
+            resolve(results.rows.length);
+        })
+    });
+}
 
-async function getCommentsByArtID(id) {
+getCommentsByArtID = (id) => {
     return new Promise((resolve, reject) => {
         pool.query(`SELECT comments FROM art WHERE id = ${id}`, (error, results) => {
             if (error) throw error;
@@ -40,7 +49,7 @@ async function getCommentsByArtID(id) {
     });
 }
 
-async function updateComments(id, comments) {
+updateComments = (id, comments) => {
     return new Promise((resolve, reject) => { 
         pool.query(`UPDATE art SET comments = '${comments}' WHERE id = ${id}`, (error, results) => {
             if (error) throw error
@@ -49,12 +58,32 @@ async function updateComments(id, comments) {
     });
 }
 
-const postComment = (req, res) => {
+function addComments(id, userID, name, content) {
+    if(userID) {
+        return new Promise((resolve, reject) => {
+            pool.query(`INSERT INTO comments(userID, artID, name, content) VALUES(${userID},${id},'${name}','${content}')`, (error, results) => {
+                if (error) throw error
+                resolve('success');
+            })
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query(`INSERT INTO comments(artID, name, content) VALUES(${id},'${name}','${content}')`, (error, results) => {
+                if (error) throw error
+                resolve('success');
+            })
+        })
+    }
+}
+
+const postComment =  async (req, res) => {
     const id = parseInt(req.params.id);
     const { userID, name, content } = req.body;
-    
-    getCommentsByArtID(id)
-        .then(comments => {
+
+    try {
+        let art = await artExists(id);
+        if(art > 0) {
+            let comments = await getCommentsByArtID(id);
             if(!userID) {
                 for(let i = 0; i < comments.length; i++) {
                     if(comments[i].name === name) {
@@ -63,9 +92,6 @@ const postComment = (req, res) => {
                     }
                 }
             }
-            return comments;
-        })
-        .then(comments => {
             if(res.statusCode !== 406) {
                 comments.push({
                     'userID': userID,
@@ -73,17 +99,19 @@ const postComment = (req, res) => {
                     'content': content
                 });
                 comments = JSON.stringify(comments);
-                return updateComments(id, comments);
+                var status = await updateComments(id, comments);
             }
-        })
-        .then((status) => {
-            if(status) {
-                res.send('Comment added successfully');
-            } else {
-                res.send('Only one comment per unverified user, comment was unable to be added')
-            }
-        })
-        .catch(err => res.send(err));
+            if(status === 'success') status = await addComments(id, userID, name, content);
+            if(status === 'success') res.send('Comment added successfully');
+            res.send('Only one comment per unverified user, comment was unable to be added')
+        }
+        else {
+            res.send('Art ID is invalid');
+        }
+    }
+    catch(e) {
+        throw e;
+    }
 }
 
 const createUser = (req, res) => {
