@@ -100,7 +100,7 @@ const postComment =  async (req, res) => {
             };
         }
         else {
-            res.send('Art ID is invalid');
+            res.status(400).send('Art ID is invalid');
         }
     }
     catch(e) {
