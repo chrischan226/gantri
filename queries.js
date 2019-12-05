@@ -40,6 +40,40 @@ getArtInfo = (id) => {
     });
 }
 
+updateArt = (data) => {
+    const { id, title, artist, year, comments, bids, status } = data;
+    let bidsStorage = JSON.stringify(bids);
+    let commentsStorage = JSON.stringify(comments);
+
+    return new Promise((resolve, reject) => { 
+        pool.query(`UPDATE art SET status = '${status}', bids = '${bidsStorage}', title = '${title}', artist = '${artist}', year = ${year}, comments = '${commentsStorage}'  WHERE id = ${id}`, (error, results) => {
+            if (error) throw error
+            resolve(`Art is now sold`);
+        })
+    });
+
+}
+
+updateArtAuction = (bids, id) => {
+    bids = JSON.stringify(bids);
+    return new Promise((resolve, reject) => { 
+        pool.query(`UPDATE art SET status = 'sold', bids = '${bids}' WHERE id = ${id}`, (error, results) => {
+            if (error) throw error
+            resolve(`Art is now sold`);
+        })
+    });
+}
+
+
+updateArtState = (state, id) => {
+    return new Promise((resolve, reject) => { 
+        pool.query(`UPDATE art SET status = '${state}' WHERE id = ${id}`, (error, results) => {
+            if (error) throw error
+            resolve(`Art is now ${state}`);
+        })
+    });
+}
+
 updateComments = (id, comments) => {
     return new Promise((resolve, reject) => { 
         pool.query(`UPDATE art SET comments = '${comments}' WHERE id = ${id}`, (error, results) => {
@@ -132,10 +166,52 @@ const getUsers = (req, res) => {
     })
 }
 
+const setMaxBid = (req, res) => {
+    const { userID, maxBid } = req.body;
+
+    if(maxBid > 1) {
+        pool.query(`UPDATE users SET maxBid = ${maxBid} where id = ${userID}`, (error, results) => {
+            if (error) res.statusCode(400);
+            if(res.statusCode === 200) {
+                res.send('Max bid successfully updated')
+            } else {
+                res.send(error)
+            }
+        })
+    } else {
+        res.status(400).send('Max bid must be greater than 1');
+    }
+}
+
+startBid = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        let artInfo = await getArtInfo(id);
+        if(artInfo[0].status === 'unsold') {
+            try {
+                let message = await updateArtState('sold',id);
+                res.send(message);
+            }
+            catch(e) {
+                throw e;
+            }
+        } else {
+            res.status(400).send('Cannot start bidding because Art is not unsold')
+        }
+    } catch(e) {
+        throw e;
+    }
+}
+
 module.exports = {
     getArt,
     getArtByID,
     postComment,
     createUser,
     getUsers,
+    setMaxBid,
+    startBid,
+    updateArtAuction,
+    updateArt,
 };

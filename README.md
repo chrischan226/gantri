@@ -7,6 +7,12 @@ npm install
 npm start
 ```
 
+To Run Silent Auction Program
+
+```
+node bidding.js;
+```
+
 ## Copy csv into psql
 
 ```

@@ -1,15 +1,18 @@
 CREATE TABLE art (
     id integer primary key,
-    title varchar(500) NOT NULL,
-    artist varchar(200) NOT NULL,
-    year smallint NOT NULL,
-    comments json DEFAULT '[]'
+    title varchar(500),
+    artist varchar(200),
+    year smallint,
+    status varchar(100) NOT NULL DEFAULT 'unsold',
+    comments json DEFAULT '[]',
+    bids json DEFAULT '[]'
 );
 
 CREATE TABLE users (
     id serial UNIQUE primary key,
     name varchar(25) NOT NULL,
     age smallint NOT NULL,
+    maxBid smallint,
     location varchar(25) NOT NULL
 );
 
